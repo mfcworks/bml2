@@ -43,7 +43,12 @@ public class ExtendedBML {
 
 	/**
 	 * 初期配置の基本状態をセットする
+	 *
+	 * この初期化方法では、定数回ループで実行できるが、
+	 * ランダム化に定量的なばらつきが出てしまって一様では
+	 * ないので、やっぱりランダムにセットしていく方針にする。
 	 */
+	@Deprecated
 	void initialize() {
 		final int empty = 0, up = 1, down = 2, left = 3, right = 4;
 		int[][] temp = new int[L][L];
@@ -110,7 +115,7 @@ public class ExtendedBML {
 			}
 		}
 
-		
+
 		// 初期状態をsiteX, siteYにコピー
 		for (int i = 0; i < L; i++) {
 			for (int j = 0; j < L; j++) {
@@ -255,6 +260,6 @@ public class ExtendedBML {
 			}
 			System.out.println();
 		}
-		
+
 	}
 }
