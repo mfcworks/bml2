@@ -43,69 +43,70 @@ public class ExtendedBML {
 
 	/**
 	 * 初期配置の基本状態をセットする
-	 *
-	 * この初期化方法では、定数回ループで実行できるが、
-	 * ランダム化に定量的なばらつきが出てしまって一様では
-	 * ないので、やっぱりランダムにセットしていく方針にする。
 	 */
-	@Deprecated
-	void initialize() {
+	void initialize() throws Exception {
 		final int empty = 0, up = 1, down = 2, left = 3, right = 4;
+		final int maxTrials = this.L * 2; // 最大試行回数を 2L とする。
 		int[][] temp = new int[L][L];
-		int x, y, rnd;
+		int x, y, rnd, trial;
 
-		// 対角線上に基本形を配置する
+		// ランダムにセットする
 		// k回繰り返す
-		for (int i = 0; i < k; i++) {
+		for (int i = 0; i < this.k; i++) {
 			x = 2*i; y = 0;
 			// L/2回繰り返す
 			for (int j = 0; j < L/2; j++) {
-				temp[x  ][y  ] = up;
-				temp[x+1][y  ] = left;
-				temp[x  ][y+1] = right;
-				temp[x+1][y+1] = down;
 
-				x += 2; y += 2;
-				if (x >= L) x = 0;
-			}
-		}
-
-		// ランダムに散らばらせる
-		// k回繰り返す
-		for (int i = 0; i < k; i++) {
-			x = 2*i; y = 0;
-			// L/2回繰り返す
-			for (int j = 0; j < L/2; j++) {
-				// オフセット(x,y)の渋滞ユニットをランダムに移動する
 				// 上向き車 @ (x,y)
-				rnd = random.nextInt(L); // [0,L-1]の乱数を振る
-				if (temp[x][rnd] == empty) {
-					temp[x][rnd] = up;
-					temp[x][y] = empty;
+				for (trial = 0; trial < maxTrials; trial++) {
+					rnd = random.nextInt(L);
+					if (temp[x][rnd] == empty) {
+						temp[x][rnd] = up;
+						break;
+					}
+				}
+				if (trial == maxTrials) {
+					throw new Exception("maxTrials回を超えても設定できません。");
 				}
 				// 左向き車 @ (x+1,y)
-				rnd = random.nextInt(L);
-				if (temp[rnd][y] == empty) {
-					temp[rnd][y] = left;
-					temp[x+1][y] = empty;
+				for (trial = 0; trial < maxTrials; trial++) {
+					rnd = random.nextInt(L);
+					if (temp[rnd][y] == empty) {
+						temp[rnd][y] = left;
+						break;
+					}
+				}
+				if (trial == maxTrials) {
+					throw new Exception("maxTrials回を超えても設定できません。");
 				}
 				// 右向き車 @ (x,y+1)
-				rnd = random.nextInt(L);
-				if (temp[rnd][y+1] == empty) {
-					temp[rnd][y+1] = right;
-					temp[x][y+1] = empty;
+				for (trial = 0; trial < maxTrials; trial++) {
+					rnd = random.nextInt(L);
+					if (temp[rnd][y+1] == empty) {
+						temp[rnd][y+1] = right;
+						break;
+					}
+				}
+				if (trial == maxTrials) {
+					throw new Exception("maxTrials回を超えても設定できません。");
 				}
 				// 下向き車 @ (x+1,y+1)
-				rnd = random.nextInt(L);
-				if (temp[x+1][rnd] == empty) {
-					temp[x+1][rnd] = down;
-					temp[x+1][y+1] = empty;
+				for (trial = 0; trial < maxTrials; trial++) {
+					rnd = random.nextInt(L);
+					if (temp[x+1][rnd] == empty) {
+						temp[x+1][rnd] = down;
+						break;
+					}
+				}
+				if (trial == maxTrials) {
+					throw new Exception("maxTrials回を超えても設定できません。");
 				}
 
 				x += 2; y += 2;
 				if (x >= L) x = 0;
 			}
 		}
+
 
 		// <siteX, siteY初期化>
 		for (int i = 0; i < L; i++) {
@@ -134,6 +135,7 @@ public class ExtendedBML {
 			}
 		}
 	}
+
 
 	/**
 	 * サイトの状態をコンソールに表示する
@@ -236,30 +238,54 @@ public class ExtendedBML {
 	 * 縦方向の車を１ステップ動かす（スロースタート効果あり）
 	 */
 	private void moveVerticalSlowStart() {
-
+		
 	}
 
-	public static void main(String[] args) {
-		int l = 16;
-		ExtendedBML bml = new ExtendedBML(l, 3);
-		int[][] test = new int[l][l];
+	
+	public void check() {
+		for (int i = 0; i < L; i++) {
+			int countX = 0, countY = 0;
+			for (int j = 0; j < L; j++) {
+				countX += siteX[j][i];
+				countY += siteY[i][j];
+			}
+			if (countX != k || countY != k) {
+				System.out.println("Error");
+			}
+		}
+	}
 
-		for (int i = 0; i < 10000; i++) {
-			bml.initialize();
-			for (int j = 0; j < l; j++) {
-				for (int k = 0; k < l; k++) {
-					if(bml.siteX[j][k] == 1 || bml.siteY[j][k] == 1)
-						test[j][k]++;
+
+	public static void main(String[] args) {
+		int Lat = 20;
+		ExtendedBML bml = new ExtendedBML(Lat, 6);
+		int[][] temp = new int[Lat][Lat];
+		
+		for (int i = 0; i < 1000; i++) {
+			// 初期化
+			try {
+				bml.initialize();
+			} catch (Exception e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+				System.exit(1);
+			}
+			bml.check();
+			// 加算
+			for (int j = 0; j < Lat; j++) {
+				for (int k = 0; k < Lat; k++) {
+					temp[j][k] += bml.siteX[j][k] + bml.siteY[j][k];
 				}
 			}
 		}
-
-		for (int j = 0; j < l; j++) {
-			for (int i = 0; i < l; i++) {
-				System.out.print(test[i][j] + " ");
+		
+		for (int i = 0; i < Lat; i++) {
+			for (int j = 0; j < Lat; j++) {
+				System.out.print(temp[i][j] + " ");
 			}
 			System.out.println();
 		}
+
 
 	}
 }
