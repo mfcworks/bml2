@@ -200,13 +200,13 @@ public class ExtendedBML {
 	 */
 	private void moveHorizontal(boolean ss) {
 		int[][] temp = new int[L][L];
+		int i=0, next, prev=0, rnd;
 
 		// 列を j=0→(L-1) まで回す
 		for (int j = 0; j < L; j++) {
 
 			// 行を１回余分に回す
 			for (int n = 0; n <= L; n++) {
-				int i, next, prev, rnd;
 
 				if (j % 2 == 0) {
 					// jが偶数の場合、右向き
@@ -219,19 +219,23 @@ public class ExtendedBML {
 					next = (i == 0 ? L-1 : i-1);
 					prev = (i == L-1 ? 0 : i+1);
 				}
+				if (n == L) break; // 最終回だったらbreak
 
 				// スロースタート効果がない場合、rnd = 0
 				// スロースタート効果がある場合、移動しないとき、rnd = 1
 				// 移動しないのは(1-P)の確率で起こる
 				rnd = (ss ? ((random.nextDouble() >= P) ? 1 : 0) : 0);
 
-				temp[i][j] = siteX[i][j]*(siteX[next][j]+siteY[next][j]+rnd)
+				temp[i][j] = siteX[i][j]*((siteX[next][j]+siteY[next][j])|rnd)
 						   + (1-siteX[i][j])*(1-siteY[i][j])*siteX[prev][j]*(1-temp[prev][j]);
 			}
+			// プラス１回
+			temp[i][j] = (1-siteX[i][j])*(1-siteY[i][j])*siteX[prev][j]*(1-temp[prev][j])
+					   + (1 - (1-siteX[i][j])*(1-siteY[i][j])*siteX[prev][j])*temp[i][j];
 		}
 
 		// tempをsiteXにコピー
-		for (int i = 0; i < L; i++) {
+		for (i = 0; i < L; i++) {
 			for (int j = 0; j < L; j++) {
 				siteX[i][j] = temp[i][j];
 			}
@@ -246,13 +250,13 @@ public class ExtendedBML {
 	 */
 	private void moveVertical(boolean ss) {
 		int[][] temp = new int[L][L];
+		int j=0, next, prev=0, rnd;
 
 		// 行を i=0→(L-1) まで回す
 		for (int i = 0; i < L; i++) {
 
 			// 列を１回余分に回す
 			for (int n = 0; n <= L; n++) {
-				int j, next, prev, rnd;
 
 				if (i % 2 == 0) {
 					// iが偶数の場合、上向き
@@ -265,27 +269,28 @@ public class ExtendedBML {
 					next = (j == L-1 ? 0 : j+1);
 					prev = (j == 0 ? L-1 : j-1);
 				}
+				if (n == L) break; // 最終回だったらbreak;
 
 				// スロースタート効果がない場合、rnd = 0
 				// スロースタート効果がある場合、移動しないとき、rnd = 1
 				// 移動しないのは(1-P)の確率で起こる
 				rnd = (ss ? ((random.nextDouble() >= P) ? 1 : 0) : 0);
 
-				temp[i][j] = siteY[i][j]*(siteX[i][next]+siteY[i][next]+rnd)
+				temp[i][j] = siteY[i][j]*((siteX[i][next]+siteY[i][next])|rnd)
 						   + (1-siteX[i][j])*(1-siteY[i][j])*siteY[i][prev]*(1-temp[i][prev]);
 			}
+			// プラス１回
+			temp[i][j] = (1-siteX[i][j])*(1-siteY[i][j])*siteY[i][prev]*(1-temp[i][prev])
+					   + (1 - (1-siteX[i][j])*(1-siteY[i][j])*siteY[i][prev])*temp[i][j];
 		}
 
 		// tempをsiteYにコピー
 		for (int i = 0; i < L; i++) {
-			for (int j = 0; j < L; j++) {
+			for (j = 0; j < L; j++) {
 				siteY[i][j] = temp[i][j];
 			}
 		}
 	}
-
-
-
 
 
 
@@ -314,9 +319,12 @@ public class ExtendedBML {
 			System.exit(1);
 		}
 		bml.show();
-//		bml.moveHorizontal(true);
-//		bml.moveHorizontal(false);
-		bml.moveVertical(true);
+
+		bml.setP(0.5);
+		bml.setTau(40);
+
+		
+		bml.move1period();
 		bml.check();
 		bml.show();
 	}
