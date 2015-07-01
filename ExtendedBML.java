@@ -46,7 +46,7 @@ public class ExtendedBML {
 	 */
 	void initialize() throws Exception {
 		final int empty = 0, up = 1, down = 2, left = 3, right = 4;
-		final int maxTrials = this.L * 7; // 最大試行回数を 2L とする。
+		final int maxTrials = this.L * 10; // 最大試行回数を 10L とする。
 		int[][] temp = new int[L][L];
 		int x, y, rnd, trial;
 
@@ -108,18 +108,13 @@ public class ExtendedBML {
 		}
 
 
-		// <siteX, siteY初期化>
-		for (int i = 0; i < L; i++) {
-			for (int j = 0; j < L; j++) {
-				siteX[i][j] = 0;
-				siteY[i][j] = 0;
-			}
-		}
-
-
 		// 初期状態をsiteX, siteYにコピー
 		for (int i = 0; i < L; i++) {
 			for (int j = 0; j < L; j++) {
+				// 配列の初期化
+				siteX[i][j] = 0;
+				siteY[i][j] = 0;
+
 				switch (temp[i][j]) {
 				case left:
 					// fall through
