@@ -271,15 +271,15 @@ public class ExtendedBML {
 				// 移動しないのは(1-P)の確率で起こる
 				rnd = (ss ? ((random.nextDouble() >= P) ? 1 : 0) : 0);
 
-				temp[i][j] = siteX[i][j]*(siteX[i][next]+siteY[i][next]+rnd)
-						   + (1-siteX[i][j])*(1-siteY[i][j])*siteX[i][prev]*(1-temp[i][prev]);
+				temp[i][j] = siteY[i][j]*(siteX[i][next]+siteY[i][next]+rnd)
+						   + (1-siteX[i][j])*(1-siteY[i][j])*siteY[i][prev]*(1-temp[i][prev]);
 			}
 		}
 
-		// tempをsiteXにコピー
+		// tempをsiteYにコピー
 		for (int i = 0; i < L; i++) {
 			for (int j = 0; j < L; j++) {
-				siteX[i][j] = temp[i][j];
+				siteY[i][j] = temp[i][j];
 			}
 		}
 	}
@@ -298,27 +298,26 @@ public class ExtendedBML {
 			}
 			if (countX != k || countY != k) {
 				System.out.println("Error");
+				return;
 			}
 		}
+		System.out.println("OK");
 	}
 
 
 	public static void main(String[] args) {
-		int lat = 10;
-
-		for (int k = 1; k <= lat/2; k++) {
-			ExtendedBML bml = new ExtendedBML(lat, k);
-
-			int count = 0;
-			for (int i = 0; i < 1000; i++) {
-				try {
-					bml.initialize();
-				} catch (Exception e) {
-					continue;
-				}
-				count++;
-			}
-			System.out.println("k=" + k + ", ρ=" + 2.0*k/lat + " 成功率 " + count/1000.0 * 100 + "%");
+		ExtendedBML bml = new ExtendedBML(10, 2);
+		try {
+			bml.initialize();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.exit(1);
 		}
+		bml.show();
+//		bml.moveHorizontal(true);
+//		bml.moveHorizontal(false);
+		bml.moveVertical(true);
+		bml.check();
+		bml.show();
 	}
 }
