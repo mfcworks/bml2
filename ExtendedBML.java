@@ -46,7 +46,7 @@ public class ExtendedBML {
 	 */
 	void initialize() throws Exception {
 		final int empty = 0, up = 1, down = 2, left = 3, right = 4;
-		final int maxTrials = this.L * 2; // 最大試行回数を 2L とする。
+		final int maxTrials = this.L * 7; // 最大試行回数を 2L とする。
 		int[][] temp = new int[L][L];
 		int x, y, rnd, trial;
 
@@ -183,32 +183,55 @@ public class ExtendedBML {
 		}
 	}
 
-	// 1周期分動かす
-	// 信号機の周期（this.tau）が考慮される。
-	// 車は、同じ方向に、tauの回数だけ連続して動く。
-	// 最初は横方向の車が動く。
+
+	/**
+	 * 1周期分動かす
+	 * 信号機の周期 (this.tau) が考慮される。
+	 * 車は、同じ方向にtauの回数だけ連続して動く。
+	 * 最初は横方向の車が動く。
+	 */
 	public void move1period() {
-		this.moveHorizontalSlowStart();
-		for (int i = 0; i < this.tau - 1; i++) {
-			this.moveHorizontal();
+		for (int i = 0; i < tau; i++) {
+			this.moveHorizontal(i == 0);
 		}
-		this.moveVerticalSlowStart();
-		for (int i = 0; i < this.tau - 1; i++) {
-			this.moveVertical();
+		for (int i = 0; i < tau; i++) {
+			this.moveVertical(i == 0);
 		}
 	}
 
 	/**
 	 * 横方向の車を１ステップ動かす
+	 * @param ss スロースタート効果を適用する場合、true
 	 */
-	private void moveHorizontal() {
+	private void moveHorizontal(boolean ss) {
 		int[][] temp = new int[L][L];
 
-		for (int i = 0; i < L; i++) {
-			for (int j = 0; j < L; j++) {
-				temp[i][j] = siteX[i][j]*(siteX[i+1][j]+siteY[i+1][j]) /*動けない場合*/
-						+0
-						+0;
+		// 列を j=0→(L-1) まで回す
+		for (int j = 0; j < L; j++) {
+
+			// 行を１回余分に回す
+			for (int n = 0; n <= L; n++) {
+				int i, next, prev, rnd;
+
+				if (j % 2 == 0) {
+					// jが偶数の場合、右向き
+					i = (n == L ? 0 : n);
+					next = (i == L-1 ? 0 : i+1); // 進行方向前方の車のi座標
+					prev = (i == 0 ? L-1 : i-1); // 進行方向後方の車のi座標
+				} else {
+					// jが奇数の場合、左向き
+					i = (n == L ? L-1 : L-1-n);
+					next = (i == 0 ? L-1 : i-1);
+					prev = (i == L-1 ? 0 : i+1);
+				}
+
+				// スロースタート効果がない場合、rnd = 0
+				// スロースタート効果がある場合、移動しないとき、rnd = 1
+				// 移動しないのは(1-P)の確率で起こる
+				rnd = (ss ? ((random.nextDouble() >= P) ? 1 : 0) : 0);
+
+				temp[i][j] = siteX[i][j]*(siteX[next][j]+siteY[next][j]+rnd)
+						   + (1-siteX[i][j])*(1-siteY[i][j])*siteX[prev][j]*(1-temp[prev][j]);
 			}
 		}
 
@@ -220,28 +243,57 @@ public class ExtendedBML {
 		}
 	}
 
-	/**
-	 * 横方向の車を１ステップ動かす（スロースタート効果あり）
-	 */
-	private void moveHorizontalSlowStart() {
 
-	}
 
 	/**
 	 * 縦方向の車を１ステップ動かす
+	 * @param ss スロースタート効果を適用する場合、true
 	 */
-	private void moveVertical() {
+	private void moveVertical(boolean ss) {
+		int[][] temp = new int[L][L];
 
+		// 行を i=0→(L-1) まで回す
+		for (int i = 0; i < L; i++) {
+
+			// 列を１回余分に回す
+			for (int n = 0; n <= L; n++) {
+				int j, next, prev, rnd;
+
+				if (i % 2 == 0) {
+					// iが偶数の場合、上向き
+					j = (n == L ? L-1 : L-1-n);
+					next = (j == 0 ? L-1 : j-1); // 進行方向前方の車のj座標
+					prev = (j == L-1 ? 0 : j+1); // 進行方向後方の車のj座標
+				} else {
+					// iが奇数の場合、下向き
+					j = (n == L ? 0 : n);
+					next = (j == L-1 ? 0 : j+1);
+					prev = (j == 0 ? L-1 : j-1);
+				}
+
+				// スロースタート効果がない場合、rnd = 0
+				// スロースタート効果がある場合、移動しないとき、rnd = 1
+				// 移動しないのは(1-P)の確率で起こる
+				rnd = (ss ? ((random.nextDouble() >= P) ? 1 : 0) : 0);
+
+				temp[i][j] = siteX[i][j]*(siteX[i][next]+siteY[i][next]+rnd)
+						   + (1-siteX[i][j])*(1-siteY[i][j])*siteX[i][prev]*(1-temp[i][prev]);
+			}
+		}
+
+		// tempをsiteXにコピー
+		for (int i = 0; i < L; i++) {
+			for (int j = 0; j < L; j++) {
+				siteX[i][j] = temp[i][j];
+			}
+		}
 	}
 
-	/**
-	 * 縦方向の車を１ステップ動かす（スロースタート効果あり）
-	 */
-	private void moveVerticalSlowStart() {
-		
-	}
 
-	
+
+
+
+
 	public void check() {
 		for (int i = 0; i < L; i++) {
 			int countX = 0, countY = 0;
@@ -257,35 +309,21 @@ public class ExtendedBML {
 
 
 	public static void main(String[] args) {
-		int Lat = 20;
-		ExtendedBML bml = new ExtendedBML(Lat, 6);
-		int[][] temp = new int[Lat][Lat];
-		
-		for (int i = 0; i < 1000; i++) {
-			// 初期化
-			try {
-				bml.initialize();
-			} catch (Exception e) {
-				// TODO 自動生成された catch ブロック
-				e.printStackTrace();
-				System.exit(1);
-			}
-			bml.check();
-			// 加算
-			for (int j = 0; j < Lat; j++) {
-				for (int k = 0; k < Lat; k++) {
-					temp[j][k] += bml.siteX[j][k] + bml.siteY[j][k];
+		int lat = 10;
+
+		for (int k = 1; k <= lat/2; k++) {
+			ExtendedBML bml = new ExtendedBML(lat, k);
+
+			int count = 0;
+			for (int i = 0; i < 1000; i++) {
+				try {
+					bml.initialize();
+				} catch (Exception e) {
+					continue;
 				}
+				count++;
 			}
+			System.out.println("k=" + k + ", ρ=" + 2.0*k/lat + " 成功率 " + count/1000.0 * 100 + "%");
 		}
-		
-		for (int i = 0; i < Lat; i++) {
-			for (int j = 0; j < Lat; j++) {
-				System.out.print(temp[i][j] + " ");
-			}
-			System.out.println();
-		}
-
-
 	}
 }
