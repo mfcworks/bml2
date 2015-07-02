@@ -226,7 +226,7 @@ public class ExtendedBML {
 				// 移動しないのは(1-P)の確率で起こる
 				rnd = (ss ? ((random.nextDouble() >= P) ? 1 : 0) : 0);
 
-				temp[i][j] = siteX[i][j]*((siteX[next][j]+siteY[next][j])|rnd)
+				temp[i][j] = siteX[i][j]*(siteX[next][j]+siteY[next][j]+(1-siteX[next][j])*(1-siteY[next][j])*rnd)
 						   + (1-siteX[i][j])*(1-siteY[i][j])*siteX[prev][j]*(1-temp[prev][j]);
 			}
 			// プラス１回
@@ -276,7 +276,7 @@ public class ExtendedBML {
 				// 移動しないのは(1-P)の確率で起こる
 				rnd = (ss ? ((random.nextDouble() >= P) ? 1 : 0) : 0);
 
-				temp[i][j] = siteY[i][j]*((siteX[i][next]+siteY[i][next])|rnd)
+				temp[i][j] = siteY[i][j]*(siteX[i][next]+siteY[i][next]+(1-siteX[i][next])*(1-siteY[i][next])*rnd)
 						   + (1-siteX[i][j])*(1-siteY[i][j])*siteY[i][prev]*(1-temp[i][prev]);
 			}
 			// プラス１回
@@ -311,7 +311,8 @@ public class ExtendedBML {
 
 
 	public static void main(String[] args) {
-		ExtendedBML bml = new ExtendedBML(10, 2);
+		/*
+		ExtendedBML bml = new ExtendedBML(20, 5);
 		try {
 			bml.initialize();
 		} catch (Exception e) {
@@ -323,9 +324,12 @@ public class ExtendedBML {
 		bml.setP(0.5);
 		bml.setTau(40);
 
-		
-		bml.move1period();
+		for (int i = 0; i < 30; i++)
+			bml.move1period();
 		bml.check();
 		bml.show();
+		System.out.println("終了します");
+		System.exit(0);
+		*/
 	}
 }
