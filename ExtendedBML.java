@@ -1,5 +1,7 @@
 package bml2;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.util.Random;
 
 public class ExtendedBML {
@@ -9,6 +11,9 @@ public class ExtendedBML {
 	private int tau = 1; // 信号機の周期
 	private double P = 1.0; // スロースタート効果
 	private static Random random = new Random();
+
+	// for debug
+	private FileWriter fw;
 
 	/**
 	 * コンストラクタ
@@ -107,7 +112,6 @@ public class ExtendedBML {
 			}
 		}
 
-
 		// 初期状態をsiteX, siteYにコピー
 		for (int i = 0; i < L; i++) {
 			for (int j = 0; j < L; j++) {
@@ -129,6 +133,8 @@ public class ExtendedBML {
 				}
 			}
 		}
+		// debug
+		this.fileAdd();
 	}
 
 
@@ -185,12 +191,14 @@ public class ExtendedBML {
 	 * 車は、同じ方向にtauの回数だけ連続して動く。
 	 * 最初は横方向の車が動く。
 	 */
-	public void move1period() {
+	public void move1period() throws Exception {
 		for (int i = 0; i < tau; i++) {
 			this.moveHorizontal(i == 0);
+			this.fileAdd();
 		}
 		for (int i = 0; i < tau; i++) {
 			this.moveVertical(i == 0);
+			this.fileAdd();
 		}
 	}
 
@@ -309,27 +317,50 @@ public class ExtendedBML {
 		System.out.println("OK");
 	}
 
+	public void fileAdd() throws Exception {
 
-	public static void main(String[] args) {
-		/*
-		ExtendedBML bml = new ExtendedBML(20, 5);
-		try {
-			bml.initialize();
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			System.exit(1);
+        String br = System.getProperty("line.separator");
+
+		for (int j = 0; j < L; j++) {
+			for (int i = 0; i < L; i++) {
+				String val = (siteX[i][j] == 1 ? "x" :
+					(siteY[i][j] == 1 ? "y" : "0"));
+				fw.write("" + val);
+			}
 		}
-		bml.show();
+		fw.write(br);
+	}
+
+	// ファイルを開く
+	public void fileOpen(String filename) throws Exception {
+		// カレントディレクトリ
+		String cd = new File(".").getAbsoluteFile().getParent();
+        String file = cd + "\\" + filename;
+		fw = new FileWriter(file);
+		// L
+		fw.write("" + L + System.getProperty("line.separator"));
+
+	}
+
+	// ファイルを閉じる
+	public void fileClose() throws Exception {
+		fw.close();
+		System.out.println("書き込み終了");
+	}
+
+
+	public static void main(String[] args) throws Exception {
+		ExtendedBML bml = new ExtendedBML(20, 4);
+		bml.fileOpen("test.txt");
 
 		bml.setP(0.5);
-		bml.setTau(40);
+		bml.setTau(4);
+		bml.initialize();
 
-		for (int i = 0; i < 30; i++)
+		for (int i = 0; i < 15; i ++)
 			bml.move1period();
-		bml.check();
+
+		bml.fileClose();
 		bml.show();
-		System.out.println("終了します");
-		System.exit(0);
-		*/
 	}
 }
