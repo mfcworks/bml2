@@ -37,6 +37,13 @@ public class ExtendedBML {
 	}
 
 	/**
+	 * 描画のために系の状態を与える
+	 */
+	public int[][][] getSites() {
+		return new int[][][] {siteX, siteY};
+	}
+
+	/**
 	 * 系の情報を表示する
 	 */
 	public void showInfo() {
@@ -191,14 +198,12 @@ public class ExtendedBML {
 	 * 車は、同じ方向にtauの回数だけ連続して動く。
 	 * 最初は横方向の車が動く。
 	 */
-	public void move1period() throws Exception {
+	public void move1period() {
 		for (int i = 0; i < tau; i++) {
 			this.moveHorizontal(i == 0);
-			this.fileAdd();
 		}
 		for (int i = 0; i < tau; i++) {
 			this.moveVertical(i == 0);
-			this.fileAdd();
 		}
 	}
 
