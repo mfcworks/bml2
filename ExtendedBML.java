@@ -1,7 +1,5 @@
 package bml2;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.util.Random;
 
 public class ExtendedBML {
@@ -10,10 +8,8 @@ public class ExtendedBML {
 	private int k; // 最小密度の倍数定数
 	private int tau = 1; // 信号機の周期
 	private double P = 1.0; // スロースタート効果
+	private int current = 0; // 現在の段階
 	private static Random random = new Random();
-
-	// for debug
-	private FileWriter fw;
 
 	/**
 	 * コンストラクタ
@@ -140,8 +136,6 @@ public class ExtendedBML {
 				}
 			}
 		}
-		// debug
-		this.fileAdd();
 	}
 
 
@@ -191,6 +185,28 @@ public class ExtendedBML {
 		}
 	}
 
+	/**
+	 * 1回動かす
+	 * this.currentによって移動方向ならびにスロースタート効果を決定する
+	 */
+	public void move() {
+		if (current == 0) {
+			moveHorizontal(true);
+		} else if (current < tau) {
+			moveHorizontal(false);
+		} else if (current == tau) {
+			moveVertical(true);
+		} else {
+//			assert (current < 2 * tau);
+			moveVertical(false);
+		}
+
+		current++;
+		if (current == 2 * tau) {
+			current = 0;
+		}
+	}
+
 
 	/**
 	 * 1周期分動かす
@@ -199,11 +215,8 @@ public class ExtendedBML {
 	 * 最初は横方向の車が動く。
 	 */
 	public void move1period() {
-		for (int i = 0; i < tau; i++) {
-			this.moveHorizontal(i == 0);
-		}
-		for (int i = 0; i < tau; i++) {
-			this.moveVertical(i == 0);
+		for (int i = 0; i < 2 * tau; i++) {
+			move();
 		}
 	}
 
@@ -322,6 +335,7 @@ public class ExtendedBML {
 		System.out.println("OK");
 	}
 
+/*
 	public void fileAdd() throws Exception {
 
         String br = System.getProperty("line.separator");
@@ -352,20 +366,18 @@ public class ExtendedBML {
 		fw.close();
 		System.out.println("書き込み終了");
 	}
-
+*/
 
 	public static void main(String[] args) throws Exception {
 		ExtendedBML bml = new ExtendedBML(20, 4);
-		bml.fileOpen("test.txt");
-
-		bml.setP(0.5);
-		bml.setTau(4);
 		bml.initialize();
+		bml.show();
+		bml.setTau(3);
 
-		for (int i = 0; i < 15; i ++)
+		for (int i = 0; i < 10; i++)
 			bml.move1period();
 
-		bml.fileClose();
+		System.out.println();
 		bml.show();
 	}
 }
