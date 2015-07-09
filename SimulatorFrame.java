@@ -5,15 +5,17 @@ import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 
 public class SimulatorFrame extends JFrame implements Runnable {
 
-	private static final int L = 20; // 格子数
+	private static final int L = 100;//380; // 格子数
 	private static final int k = 1;  // 密度指定
 
 	public static SimulatorFrame frame;
@@ -31,6 +33,7 @@ public class SimulatorFrame extends JFrame implements Runnable {
 	public boolean running = false;
 
 	private Thread animationThread;
+	private JLabel lblDeadlocks;
 
 
 	/**
@@ -44,17 +47,20 @@ public class SimulatorFrame extends JFrame implements Runnable {
 			bml.initialize();
 		} catch (Exception e1) {
 		}
+		bml.setP(0.5);
+		bml.setTau(3);
 
 		setTitle("Extended BML Model Simulator");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 640, 480);
+		setBounds(100, 100, 900, 820);
 		getContentPane().setLayout(null);
+		getContentPane().setSize(900, 800);
 
 		// パネル
 		panel = new SimulatorPanel();
 		panel.setBackground(Color.WHITE);
-		panel.setBounds(0, 0, 480, 480);
+		panel.setBounds(0, 0, 800, 800);
 		getContentPane().add(panel);
 
 		// ボタン1
@@ -70,8 +76,12 @@ public class SimulatorFrame extends JFrame implements Runnable {
 				animationThread.interrupt();
 			}
 		});
-		btnStart.setBounds(492, 334, 91, 21);
+		btnStart.setBounds(814, 653, 68, 21);
 		getContentPane().add(btnStart);
+
+		lblDeadlocks = new JLabel("deadlocks");
+		lblDeadlocks.setBounds(814, 573, 50, 13);
+		getContentPane().add(lblDeadlocks);
 
 		animationThread = new Thread(this, "Test");
 		animationThread.start();
@@ -81,8 +91,9 @@ public class SimulatorFrame extends JFrame implements Runnable {
 	public void run() {
 		while (true) {
 			if (running) {
-				bml.move1period();
+				bml.move();
 				panel.repaint();
+				ArrayList<Integer> deadlocks = bml.countDeadlocks();
 				//System.out.println("running");
 			}
 			try {
@@ -123,8 +134,9 @@ public class SimulatorFrame extends JFrame implements Runnable {
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
 
-			drawGrid(g);
-			drawArrows(g);
+			//drawGrid(g);
+			//drawArrows(g);
+			drawCircles(g);
 		}
 
 		/**
@@ -171,5 +183,60 @@ public class SimulatorFrame extends JFrame implements Runnable {
 				}
 			}
 		}
+
+		/**
+		 * （下請けメソッド）小さい円で状態を描画します。
+		 */
+		private void drawCircles(Graphics g) {
+
+			final int d = 7;
+
+			g.setColor(Color.BLACK);
+			g.drawRect(sx, sy, d*L, d*L);
+
+			int[][][] sites = bml.getSites();
+			int[][] siteX = sites[0];
+			int[][] siteY = sites[1];
+
+			ArrayList<Integer> deadlocks = bml.countDeadlocks();
+			int deadlocksSize = deadlocks.size();
+			for (int i = 0; i < deadlocksSize; ) {
+				int x = deadlocks.get(i); i++;
+				int y = deadlocks.get(i); i++;
+				g.setColor(Color.MAGENTA);
+				g.fillRect(sx+d*x, sy+d*y, d*2, d*2);
+			}
+			
+			lblDeadlocks.setText("" + deadlocksSize/2);
+
+			for (int i = 0; i < L; i++) {
+				for (int j = 0; j < L; j++) {
+					if (siteX[i][j] == 1) {
+						if (j % 2 == 0) {
+							g.setColor(Color.GRAY);
+							g.fillOval(sx+d*i, sy+d*j, d, d);
+						} else {
+							g.setColor(Color.BLACK);
+							g.fillOval(sx+d*i, sy+d*j, d, d);
+						}
+					}
+					if (siteY[i][j] == 1) {
+						if (i % 2 == 0) {
+							g.setColor(Color.RED);
+							g.fillOval(sx+d*i, sy+d*j, d, d);
+						} else {
+							g.setColor(Color.BLUE);
+							g.fillOval(sx+d*i, sy+d*j, d, d);
+						}
+					}
+				}
+			}
+
+
+		}
+
+
+
+
 	}
 }

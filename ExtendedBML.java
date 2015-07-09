@@ -1,13 +1,14 @@
 package bml2;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class ExtendedBML {
 	private int[][] siteX, siteY; // 横方向・縦方向の正方格子
 	private int L; // 正方格子の一辺の数
 	private int k; // 最小密度の倍数定数
-	private int tau = 1; // 信号機の周期
-	private double P = 1.0; // スロースタート効果
+	private int tau = 1; // 信号機の周期（本論文における設定値は tau = 2）
+	private double P = 1.0; // スロースタート効果（本論文における設定値は P = 0.5）
 	private int current = 0; // 現在の段階
 	private static Random random = new Random();
 
@@ -335,6 +336,29 @@ public class ExtendedBML {
 		System.out.println("OK");
 	}
 
+
+	/**
+	 * デッドロックを数える。
+	 */
+	public ArrayList<Integer> countDeadlocks() {
+		int count = 0;
+		ArrayList<Integer> list = new ArrayList<Integer>();
+
+		for (int i = 0; i < L - 2; i+=2) {
+			for (int j = 0; j < L - 2; j+=2) {
+				if (siteX[i][j] == 1 && siteX[i+1][j+1] == 1 && siteY[i+1][j] == 1 && siteY[i][j+1] == 1) {
+					count++;
+					list.add(i); list.add(j);
+				}
+				if (siteY[i+1][j+1] == 1 && siteY[i+2][j+2] == 1 && siteX[i+2][j+1] == 1 && siteX[i+1][j+2] == 1) {
+					count++;
+					list.add(i+1); list.add(j+1);
+				}
+			}
+		}
+
+		return list;
+	}
 /*
 	public void fileAdd() throws Exception {
 
