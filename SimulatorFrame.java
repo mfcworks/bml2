@@ -11,12 +11,13 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 
 public class SimulatorFrame extends JFrame implements Runnable {
 
-	private static final int L = 20;//380; // 格子数
-	private static final int k = 4;  // 密度指定
+	private static int L = 20;//380; // 格子数
+	private static int k = 4;  // 密度指定
 
 	public static SimulatorFrame frame;
 
@@ -31,9 +32,19 @@ public class SimulatorFrame extends JFrame implements Runnable {
 	private JPanel panel;
 
 	public boolean running = false;
+	public int step = 0;
 
 	private Thread animationThread;
 	private JLabel lblDeadlocks;
+	private JTextField textField;
+	private JTextField textField_1;
+	private JLabel lblStep;
+	private JLabel lblTau;
+	private JLabel lblP;
+	private JLabel lblStepval;
+	private JButton btnReset;
+	private JLabel lblL;
+	private JLabel lblK;
 
 
 	/**
@@ -69,8 +80,10 @@ public class SimulatorFrame extends JFrame implements Runnable {
 			public void actionPerformed(ActionEvent e) {
 				if (running) {
 					btnStart.setText("Start");
+					btnReset.setEnabled(true);
 				} else {
 					btnStart.setText("Stop");
+					btnReset.setEnabled(false);
 				}
 				running = !running;
 				animationThread.interrupt();
@@ -82,6 +95,83 @@ public class SimulatorFrame extends JFrame implements Runnable {
 		lblDeadlocks = new JLabel("deadlocks");
 		lblDeadlocks.setBounds(814, 573, 50, 13);
 		getContentPane().add(lblDeadlocks);
+		lblDeadlocks.setText("");
+
+		lblStep = new JLabel("step");
+		lblStep.setBounds(814, 240, 50, 13);
+		getContentPane().add(lblStep);
+
+		lblTau = new JLabel("tau");
+		lblTau.setBounds(817, 401, 50, 13);
+		getContentPane().add(lblTau);
+
+		lblP = new JLabel("P");
+		lblP.setBounds(817, 455, 50, 13);
+		getContentPane().add(lblP);
+
+		lblStepval = new JLabel("0");
+		lblStepval.setBounds(814, 263, 50, 13);
+		getContentPane().add(lblStepval);
+
+		textField = new JTextField();
+		textField.setBounds(814, 426, 68, 19);
+		getContentPane().add(textField);
+		textField.setColumns(10);
+		textField.setText("3");
+
+		textField_1 = new JTextField();
+		textField_1.setBounds(814, 478, 68, 19);
+		getContentPane().add(textField_1);
+		textField_1.setColumns(10);
+		textField_1.setText("0.5");
+
+		btnReset = new JButton("Reset");
+
+		btnReset.setBounds(814, 704, 68, 21);
+		getContentPane().add(btnReset);
+
+		lblL = new JLabel("L");
+		lblL.setBounds(814, 286, 50, 13);
+		getContentPane().add(lblL);
+
+		JTextField txtL = new JTextField();
+		txtL.setText("20");
+		txtL.setBounds(814, 309, 68, 19);
+		getContentPane().add(txtL);
+		txtL.setColumns(10);
+
+		lblK = new JLabel("k");
+		lblK.setBounds(814, 342, 50, 13);
+		getContentPane().add(lblK);
+
+		JTextField txtK = new JTextField();
+		txtK.setText("4");
+		txtK.setBounds(814, 366, 68, 19);
+		getContentPane().add(txtK);
+		txtK.setColumns(10);
+
+		btnReset.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int L = Integer.parseInt(txtL.getText());
+				int k = Integer.parseInt(txtK.getText());
+				int tau = Integer.parseInt(textField.getText());
+				double P = Double.parseDouble(textField_1.getText());
+				bml = new ExtendedBML(L, k);
+				bml.setP(P);
+				bml.setTau(tau);
+				SimulatorFrame.L = L;
+				SimulatorFrame.k = k;
+				step = 0;
+				lblStepval.setText("" + step);
+				try {
+					bml.initialize();
+				} catch (Exception e1) {
+				}
+
+			}
+		});
+
+		btnStart.requestFocus();
 
 		animationThread = new Thread(this, "Test");
 		animationThread.start();
@@ -92,6 +182,8 @@ public class SimulatorFrame extends JFrame implements Runnable {
 		while (true) {
 			if (running) {
 				bml.move();
+				step++;
+				lblStepval.setText("" + step);
 				panel.repaint();
 				ArrayList<Integer> deadlocks = bml.countDeadlocks();
 				//System.out.println("running");
@@ -133,10 +225,14 @@ public class SimulatorFrame extends JFrame implements Runnable {
 		@Override
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
+			int L = bml.getL();
 
-			//drawGrid(g);
-			//drawArrows(g);
-			drawCircles(g);
+			if (L <= 20) {
+				drawGrid(g);
+				drawArrows(g);
+			} else {
+				drawCircles(g);
+			}
 		}
 
 		/**
@@ -203,11 +299,11 @@ public class SimulatorFrame extends JFrame implements Runnable {
 			for (int i = 0; i < deadlocksSize; ) {
 				int x = deadlocks.get(i); i++;
 				int y = deadlocks.get(i); i++;
-				g.setColor(Color.CYAN);
-				g.fillRect(sx+d*x, sy+d*y, d*2, d*2);
+//				g.setColor(Color.CYAN);
+//				g.fillRect(sx+d*x, sy+d*y, d*2, d*2);
 			}
 
-			lblDeadlocks.setText("" + deadlocksSize/2);
+//			lblDeadlocks.setText("" + deadlocksSize/2);
 
 			for (int i = 0; i < L; i++) {
 				for (int j = 0; j < L; j++) {

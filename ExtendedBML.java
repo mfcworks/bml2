@@ -41,6 +41,13 @@ public class ExtendedBML {
 	}
 
 	/**
+	 * Lを返します。
+	 */
+	public int getL() {
+		return L;
+	}
+
+	/**
 	 * 系の情報を表示する
 	 */
 	public void showInfo() {
@@ -49,7 +56,7 @@ public class ExtendedBML {
 		System.out.println("車の総数:   N = " + (2*k*L));
 		System.out.println("密度:      ρ = " + (2.0*k/L));
 	}
-	
+
 	/**
 	 * 車の総数を取得する
 	 */
@@ -216,7 +223,7 @@ public class ExtendedBML {
 		if (current == 2 * tau) {
 			current = 0;
 		}
-		
+
 		return count;
 	}
 
@@ -289,7 +296,7 @@ public class ExtendedBML {
 		}
 		assert (2*count == cntTemp);
 
-		System.out.println("" + count + "  " + cntTemp);
+//		System.out.println("" + count + "  " + cntTemp);
 
 		// tempをsiteXにコピー
 		for (i = 0; i < L; i++) {
@@ -355,7 +362,7 @@ public class ExtendedBML {
 			}
 		}
 //		count = 0;
-		System.out.println("" + count + "  " + count2);
+//		System.out.println("" + count + "  " + count2);
 		assert (2*count == count2);
 
 		// tempをsiteYにコピー
@@ -451,7 +458,7 @@ public class ExtendedBML {
 
 		for (int i = 0; i < step; i++)
 			count += bml.move();
-		
+
 		double v = ((double)count) / (step * bml.getN() / 2);
 
 		System.out.println(v);
