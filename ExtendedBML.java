@@ -59,6 +59,8 @@ public class ExtendedBML {
 		int[][] temp = new int[L][L];
 		int x, y, rnd, trial;
 
+		current = 0; // リセット
+
 		// ランダムにセットする
 		// k回繰り返す
 		for (int i = 0; i < this.k; i++) {
@@ -190,22 +192,25 @@ public class ExtendedBML {
 	 * 1回動かす
 	 * this.currentによって移動方向ならびにスロースタート効果を決定する
 	 */
-	public void move() {
+	public int move() {
+		int count;
 		if (current == 0) {
-			moveHorizontal(true);
+			count = moveHorizontal(true);
 		} else if (current < tau) {
-			moveHorizontal(false);
+			count = moveHorizontal(false);
 		} else if (current == tau) {
-			moveVertical(true);
+			count = moveVertical(true);
 		} else {
-//			assert (current < 2 * tau);
-			moveVertical(false);
+			assert (current < 2 * tau);
+			count = moveVertical(false);
 		}
 
 		current++;
 		if (current == 2 * tau) {
 			current = 0;
 		}
+		
+		return count;
 	}
 
 
@@ -225,9 +230,12 @@ public class ExtendedBML {
 	 * 横方向の車を１ステップ動かす
 	 * @param ss スロースタート効果を適用する場合、true
 	 */
-	private void moveHorizontal(boolean ss) {
+	private int moveHorizontal(boolean ss) {
 		int[][] temp = new int[L][L];
 		int i=0, next, prev=0, rnd;
+		int count = 0;
+		//test
+		int cntTemp = 0;
 
 		// 列を j=0→(L-1) まで回す
 		for (int j = 0; j < L; j++) {
@@ -253,6 +261,10 @@ public class ExtendedBML {
 				// 移動しないのは(1-P)の確率で起こる
 				rnd = (ss ? ((random.nextDouble() >= P) ? 1 : 0) : 0);
 
+				// 出て行くときの回数を数える
+				if (siteX[i][j]*(1-siteX[next][j])*(1-siteY[next][j])*(1-rnd) == 1)
+					count++;
+
 				temp[i][j] = siteX[i][j]*(siteX[next][j]+siteY[next][j]+(1-siteX[next][j])*(1-siteY[next][j])*rnd)
 						   + (1-siteX[i][j])*(1-siteY[i][j])*siteX[prev][j]*(1-temp[prev][j]);
 			}
@@ -261,12 +273,25 @@ public class ExtendedBML {
 					   + (1 - (1-siteX[i][j])*(1-siteY[i][j])*siteX[prev][j])*temp[i][j];
 		}
 
+		//ここで計測する
+		for (i = 0; i < L; i++) {
+			for (int j = 0; j < L; j++) {
+				if (siteX[i][j] != temp[i][j])
+					cntTemp++;
+			}
+		}
+		assert (2*count == cntTemp);
+
+		System.out.println("" + count + "  " + cntTemp);
+
 		// tempをsiteXにコピー
 		for (i = 0; i < L; i++) {
 			for (int j = 0; j < L; j++) {
 				siteX[i][j] = temp[i][j];
 			}
 		}
+
+		return count;
 	}
 
 
@@ -275,9 +300,11 @@ public class ExtendedBML {
 	 * 縦方向の車を１ステップ動かす
 	 * @param ss スロースタート効果を適用する場合、true
 	 */
-	private void moveVertical(boolean ss) {
+	private int moveVertical(boolean ss) {
 		int[][] temp = new int[L][L];
 		int j=0, next, prev=0, rnd;
+		int count = 0;
+		int count2 = 0;
 
 		// 行を i=0→(L-1) まで回す
 		for (int i = 0; i < L; i++) {
@@ -303,6 +330,9 @@ public class ExtendedBML {
 				// 移動しないのは(1-P)の確率で起こる
 				rnd = (ss ? ((random.nextDouble() >= P) ? 1 : 0) : 0);
 
+				if (siteY[i][j] *(1-siteX[i][next])*(1-siteY[i][next])*(1-rnd) == 1)
+					count++;
+
 				temp[i][j] = siteY[i][j]*(siteX[i][next]+siteY[i][next]+(1-siteX[i][next])*(1-siteY[i][next])*rnd)
 						   + (1-siteX[i][j])*(1-siteY[i][j])*siteY[i][prev]*(1-temp[i][prev]);
 			}
@@ -311,12 +341,24 @@ public class ExtendedBML {
 					   + (1 - (1-siteX[i][j])*(1-siteY[i][j])*siteY[i][prev])*temp[i][j];
 		}
 
+		for (int i = 0; i < L; i++) {
+			for (j = 0; j < L; j++) {
+				if (siteY[i][j] != temp[i][j])
+					count2++;
+			}
+		}
+//		count = 0;
+		System.out.println("" + count + "  " + count2);
+		assert (2*count == count2);
+
 		// tempをsiteYにコピー
 		for (int i = 0; i < L; i++) {
 			for (j = 0; j < L; j++) {
 				siteY[i][j] = temp[i][j];
 			}
 		}
+
+		return count;
 	}
 
 
@@ -338,7 +380,7 @@ public class ExtendedBML {
 
 
 	/**
-	 * デッドロックを数える。
+	 * デッドロックを数える。<注：境界まで探していない>
 	 */
 	public ArrayList<Integer> countDeadlocks() {
 		int count = 0;
@@ -393,15 +435,15 @@ public class ExtendedBML {
 */
 
 	public static void main(String[] args) throws Exception {
-		ExtendedBML bml = new ExtendedBML(20, 4);
+		ExtendedBML bml = new ExtendedBML(100, 3);
 		bml.initialize();
-		bml.show();
+		//bml.show();
 		bml.setTau(3);
 
-		for (int i = 0; i < 10; i++)
-			bml.move1period();
+		for (int i = 0; i < 100; i++)
+			bml.move();
 
 		System.out.println();
-		bml.show();
+		//bml.show();
 	}
 }

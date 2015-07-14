@@ -15,8 +15,8 @@ import javax.swing.JPanel;
 
 public class SimulatorFrame extends JFrame implements Runnable {
 
-	private static final int L = 100;//380; // 格子数
-	private static final int k = 1;  // 密度指定
+	private static final int L = 20;//380; // 格子数
+	private static final int k = 4;  // 密度指定
 
 	public static SimulatorFrame frame;
 
@@ -47,7 +47,7 @@ public class SimulatorFrame extends JFrame implements Runnable {
 			bml.initialize();
 		} catch (Exception e1) {
 		}
-		bml.setP(0.5);
+//		bml.setP(0.5);
 		bml.setTau(3);
 
 		setTitle("Extended BML Model Simulator");
@@ -203,10 +203,10 @@ public class SimulatorFrame extends JFrame implements Runnable {
 			for (int i = 0; i < deadlocksSize; ) {
 				int x = deadlocks.get(i); i++;
 				int y = deadlocks.get(i); i++;
-				g.setColor(Color.MAGENTA);
+				g.setColor(Color.CYAN);
 				g.fillRect(sx+d*x, sy+d*y, d*2, d*2);
 			}
-			
+
 			lblDeadlocks.setText("" + deadlocksSize/2);
 
 			for (int i = 0; i < L; i++) {
