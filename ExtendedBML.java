@@ -49,6 +49,13 @@ public class ExtendedBML {
 		System.out.println("車の総数:   N = " + (2*k*L));
 		System.out.println("密度:      ρ = " + (2.0*k/L));
 	}
+	
+	/**
+	 * 車の総数を取得する
+	 */
+	public int getN() {
+		return 2 * k * L;
+	}
 
 	/**
 	 * 初期配置の基本状態をセットする
@@ -435,15 +442,19 @@ public class ExtendedBML {
 */
 
 	public static void main(String[] args) throws Exception {
-		ExtendedBML bml = new ExtendedBML(100, 3);
+		ExtendedBML bml = new ExtendedBML(100, 10);
+		int count = 0;
 		bml.initialize();
 		//bml.show();
 		bml.setTau(3);
+		int step = 100; // 動かすステップ数
 
-		for (int i = 0; i < 100; i++)
-			bml.move();
+		for (int i = 0; i < step; i++)
+			count += bml.move();
+		
+		double v = ((double)count) / (step * bml.getN() / 2);
 
-		System.out.println();
+		System.out.println(v);
 		//bml.show();
 	}
 }
