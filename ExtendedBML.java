@@ -205,6 +205,7 @@ public class ExtendedBML {
 	/**
 	 * 1回動かす
 	 * this.currentによって移動方向ならびにスロースタート効果を決定する
+	 * @return そのステップで動いた車の数
 	 */
 	public int move() {
 		int count;
@@ -215,7 +216,7 @@ public class ExtendedBML {
 		} else if (current == tau) {
 			count = moveVertical(true);
 		} else {
-			assert (current < 2 * tau);
+			// assert (current < 2 * tau);
 			count = moveVertical(false);
 		}
 
@@ -243,6 +244,7 @@ public class ExtendedBML {
 	/**
 	 * 横方向の車を１ステップ動かす
 	 * @param ss スロースタート効果を適用する場合、true
+	 * @return そのステップで動いた車の数
 	 */
 	private int moveHorizontal(boolean ss) {
 		int[][] temp = new int[L][L];
@@ -296,7 +298,6 @@ public class ExtendedBML {
 		}
 		assert (2*count == cntTemp);
 
-//		System.out.println("" + count + "  " + cntTemp);
 
 		// tempをsiteXにコピー
 		for (i = 0; i < L; i++) {
@@ -313,6 +314,7 @@ public class ExtendedBML {
 	/**
 	 * 縦方向の車を１ステップ動かす
 	 * @param ss スロースタート効果を適用する場合、true
+	 * @return そのステップで動いた車の数
 	 */
 	private int moveVertical(boolean ss) {
 		int[][] temp = new int[L][L];
@@ -361,8 +363,6 @@ public class ExtendedBML {
 					count2++;
 			}
 		}
-//		count = 0;
-//		System.out.println("" + count + "  " + count2);
 		assert (2*count == count2);
 
 		// tempをsiteYにコピー
@@ -414,54 +414,5 @@ public class ExtendedBML {
 		}
 
 		return list;
-	}
-/*
-	public void fileAdd() throws Exception {
-
-        String br = System.getProperty("line.separator");
-
-		for (int j = 0; j < L; j++) {
-			for (int i = 0; i < L; i++) {
-				String val = (siteX[i][j] == 1 ? "x" :
-					(siteY[i][j] == 1 ? "y" : "0"));
-				fw.write("" + val);
-			}
-		}
-		fw.write(br);
-	}
-
-	// ファイルを開く
-	public void fileOpen(String filename) throws Exception {
-		// カレントディレクトリ
-		String cd = new File(".").getAbsoluteFile().getParent();
-        String file = cd + "\\" + filename;
-		fw = new FileWriter(file);
-		// L
-		fw.write("" + L + System.getProperty("line.separator"));
-
-	}
-
-	// ファイルを閉じる
-	public void fileClose() throws Exception {
-		fw.close();
-		System.out.println("書き込み終了");
-	}
-*/
-
-	public static void main(String[] args) throws Exception {
-		ExtendedBML bml = new ExtendedBML(100, 10);
-		int count = 0;
-		bml.initialize();
-		//bml.show();
-		bml.setTau(3);
-		int step = 100; // 動かすステップ数
-
-		for (int i = 0; i < step; i++)
-			count += bml.move();
-
-		double v = ((double)count) / (step * bml.getN() / 2);
-
-		System.out.println(v);
-		//bml.show();
 	}
 }
