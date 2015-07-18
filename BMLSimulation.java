@@ -143,5 +143,6 @@ public class BMLSimulation {
 		}
 
 		System.out.println("正常終了");
+		MyTwitter.tweet("正常終了");
 	}
 }
