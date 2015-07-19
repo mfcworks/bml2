@@ -10,8 +10,8 @@ public class BMLSimulation {
 	// Static parameter:
 	static final int L = 256;
 	// Time interval:
-	static final int stepIgnored = 2_000_000;
-	static final int stepToObtain = 100_000;
+	static final int stepIgnored = 5000; //(標準2_000_000)
+	static final int stepToObtain = 2000; //(標準100_000)
 	// Trials:
 	static final int timesTrial = 20;
 	// Data file name
@@ -32,6 +32,7 @@ public class BMLSimulation {
 		double[] vs = new double[timesTrial];
 
 		for (int trial = 0; trial < timesTrial; trial++) {
+//			System.out.println("Trial " + trial);
 			// 初期化
 			try {
 				bml.initialize();
