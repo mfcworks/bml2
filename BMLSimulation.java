@@ -1,6 +1,5 @@
 package bml2;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -13,7 +12,7 @@ public class BMLSimulation {
 	static final int stepIgnored = 5000; //(標準2_000_000)
 	static final int stepToObtain = 2000; //(標準100_000)
 	// Trials:
-	static final int timesTrial = 20;
+	static final int timesTrial = 1;
 	// Data file name
 	static final String fileName = "SimulationData.csv";
 
@@ -100,50 +99,16 @@ public class BMLSimulation {
 	 */
 	public static void main(String[] args) {
 
-		//Twitter Client初期化
-		MyTwitter.initialize();
-
-		int[] taus = {1, 2};
-		double[] Ps = {0, 0.5, 1};
-		int[] ks = new int[20];
-
-		for (int i = 0; i < ks.length; i++) {
-			ks[i] = i + 1;
-		}
+		int tau = 2;
+		double P = 0.5;
+		int k = 2;
 
 		System.out.println("シミュレーションを開始します。");
 
-		// ファイルを開く
-		String curDir = new File(".").getAbsoluteFile().getParent();
-		FileWriter fw = null;
-		try {
-			fw = new FileWriter(curDir + "\\" + fileName);
-		} catch (IOException e) {
-			System.out.println("ファイルを開けません。");
-			System.out.println("シミュレーションを終了します。");
-		}
+		long tStart = System.currentTimeMillis();
+		simulate(k, tau, P);
+		long tEnd = System.currentTimeMillis();
 
-		double v;
-		for (int tau : taus) {
-			putFile(fw, "tau = " + tau);
-			for (double P : Ps) {
-				putFile(fw, "P = " + P);
-				putFile(fw, "[k], [ρ], [V]");
-				for (int k : ks) {
-					v = simulate(k, tau, P);
-					putFile(fw, "" + k + ", "  + (2.0 * k / L) + ", " + v);
-				}
-			}
-		}
-
-		// ファイルを閉じる
-		try {
-			fw.close();
-		} catch (IOException e) {
-			System.out.println("ファイルをクローズできません。");
-		}
-
-		System.out.println("正常終了");
-		MyTwitter.tweet("正常終了");
+		System.out.println("経過時間：" + ((double)(tEnd - tStart)/1000) + "秒");
 	}
 }
