@@ -10,7 +10,7 @@ public class ExtendedBML {
 	private int tau = 1; // 信号機の周期（本論文における設定値は tau = 2）
 	private double P = 1.0; // スロースタート効果（本論文における設定値は P = 0.5）
 	private int current = 0; // 現在の段階
-	private static Random random = new Random();
+	private static Random random;
 
 	/**
 	 * コンストラクタ
@@ -18,6 +18,8 @@ public class ExtendedBML {
 	 * @param k 最小密度の倍数定数（ρ=k*ρmin）
 	 */
 	ExtendedBML(int L, int k) {
+		random = new Random();
+
 		if (L <= 0 || L % 2 != 0) {
 			System.out.println("[err] Lは正の偶数でなければなりません。");
 			System.exit(1);
@@ -31,6 +33,17 @@ public class ExtendedBML {
 		this.k = k;
 		siteX = new int[L][L];
 		siteY = new int[L][L];
+	}
+
+	/**
+	 * 乱数のシード値を指定するコンストラクタ
+	 * @param L
+	 * @param k
+	 * @param 乱数のシード値
+	 */
+	ExtendedBML(int L, int k, int seed) {
+		this(L, k);
+		random = new Random(seed);
 	}
 
 	/**
